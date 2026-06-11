@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <title>Radie på karta</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    body { margin: 0; font-family: Arial; }
+    #controls {
+      padding: 10px;
+      background: #fff;
+      position: absolute;
+      z-index: 1000;
+      width: 100%;
+    }
+    #map { height: 100vh; }
+
+    input {
+      padding: 8px;
+      width: 150px;
+    }
+
+    button {
+      padding: 8px;
+      margin-left: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="controls">
+  Radie i meter:
+  <input type="number" id="radius" value="1000">
+  <button onclick="updateCircle()">Uppdatera</button>
+</div>
+
+<div id="map"></div>
+
+<script>
+let map;
+let circle;
+let userLatLng;
+
+function initMap(lat, lng) {
+  userLatLng = [lat, lng];
+
+  map = L.map('map').setView(userLatLng, 14);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
+
+  L.marker(userLatLng).addTo(map)
+    .bindPopup("Du är här")
+    .openPopup();
+
+  circle = L.circle(userLatLng, {
+    radius: 1000,
+    color: 'blue',
+    fillColor: '#blue',
+    fillOpacity: 0.2
+  }).addTo(map);
+}
+
+function updateCircle() {
+  const radius = parseFloat(document.getElementById("radius").value);
+
+  if (!circle || isNaN(radius)) return;
+
+  circle.setRadius(radius);
+  map.fitBounds(circle.getBounds());
+}
+
+// Hämta position
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(pos => {
+    initMap(pos.coords.latitude, pos.coords.longitude);
+  });
+} else {
+  alert("Geolocation stöds inte i din webbläsare");
+}
+</script>
+
+</body>
+</html>
